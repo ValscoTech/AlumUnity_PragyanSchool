@@ -16,10 +16,8 @@ const approval_page = () => {
         <NavBar></NavBar>
       </div>
       {screenSize.width > 900 && (
-        <div className="bg-indigo-100 h-screen">
+        <div className="bg-indigo-100 h-dvh">
           <div className="w-5/6  mx-auto">
-            {/* <div className='w-full h-16 bg-blue-900'></div> */}
-
             {screenSize.width > 1000 && (
               <div className="static">
                 <img
@@ -64,7 +62,7 @@ const approval_page = () => {
       )}
 
       {screenSize.width <= 900 && (
-        <div className="bg-indigo-100 h-screen">
+        <div className={`bg-indigo-100 h-[${screenSize.height}]px`}>
           <div className="w-5/6  mx-auto">
             <div className="font-center text-5xl text-gray-500 font-bold p-6">
               <center>Approval Page</center>
@@ -76,36 +74,13 @@ const approval_page = () => {
                 </div>
                 <div className="h-0.5 w-28 bg-black "></div>
               </div>
-              <div>
-                <div className="flex-shrink-0">
-                  <img
-                    src={person}
-                    className="max-h-32 rounded-lg"
-                    alt="Person"
-                  />
-                </div>
-              </div>
             </div>
             <div className="p-3">
-              <Card
-                name="Navin Sharma"
-                userName={"navinSharma2"}
-                RegNo={"21E880"}
-              ></Card>
-            </div>
-            <div className="p-3">
-              <div className="p-3 flex justify-around">
-                <div className="">
-                  <button className="w-[150px] bg-[#86C035] py-5 text-lg text-white rounded-full">
-                    Approve
-                  </button>
-                </div>
-                <div className="">
-                  <button className="w-[150px]  bg-red-700 py-5 text-lg text-white rounded-full">
-                    Deny
-                  </button>
-                </div>
-              </div>
+              <AlumniCards
+                regNo="2018B4A70633G"
+                UserName="johndoe"
+                DisplayName="John Doe"
+              />
             </div>
             <div>
               <div className="flex justify-center pt-14">
@@ -257,22 +232,33 @@ const approval_page = () => {
   );
 };
 
-const Card = ({ name, userName, RegNo }) => {
-  return (
-    <div className="py-3 font-semibold text-lg">
-      <p> Name: {name}</p>
-      <p> UserName: {userName}</p>
-      <p> Registration Number: {RegNo}</p>
-    </div>
-  );
-};
-
 const AlumniCards = (props) => {
+  const screenSize = useScreenSize();
+  function handleClickApprove() {
+    const user = {
+      status: "Approved",
+      regNo: props.regNo,
+      userName: props.UserName,
+      name: props.DisplayName,
+    };
+    console.log(user);
+  }
+
+  function handleClickDeny() {
+    const user = {
+      status: "Denied",
+      regNo: props.regNo,
+      userName: props.UserName,
+      name: props.DisplayName,
+    };
+    console.log(user);
+  }
+
   return (
     <>
-      <div className="w-3/6 mx-auto bg-white p-8 rounded-lg shadow-lg">
+      <div className="lg:w-4/6 mx-auto bg-white p-8 rounded-lg shadow-lg">
         <div className="flex justify-between items-center">
-          <div className="text-xl">
+          <div className="flex justify-between items-center w-full m-2">
             <table className="border-collapse w-full p-4">
               <tr>
                 <td className="p-3 border text-sm text-center font-semibold text-gray-700">
@@ -301,19 +287,27 @@ const AlumniCards = (props) => {
             </table>
           </div>
 
-          <div className="flex-shrink-0">
-            <img src={person} className="max-h-44 rounded-lg" alt="Person" />
-          </div>
+          {screenSize.width >= 700 && (
+            <div className="flex-shrink-0">
+              <img src={person} className="max-h-44 rounded-lg" alt="Person" />
+            </div>
+          )}
         </div>
 
         <div className="flex justify-center mt-8">
           <div className="px-4">
-            <button className="px-6 bg-green-700 py-3 text-lg text-white rounded-lg">
+            <button
+              className="px-6 bg-green-700 py-3 text-lg text-white rounded-lg"
+              onClick={() => handleClickApprove()}
+            >
               Approve
             </button>
           </div>
           <div className="px-4">
-            <button className="px-6 bg-red-700 py-3 text-lg text-white rounded-lg">
+            <button
+              className="px-6 bg-red-700 py-3 text-lg text-white rounded-lg"
+              onClick={() => handleClickDeny()}
+            >
               Deny
             </button>
           </div>

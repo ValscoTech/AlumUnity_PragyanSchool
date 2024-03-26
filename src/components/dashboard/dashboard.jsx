@@ -5,12 +5,60 @@ import DashBoardNavBar from "../helper/DashBoardNavBar";
 import { useState } from "react";
 import Notification from "../notification/notification";
 import useScreenSize from "../../utils/useScreenSize";
+import { AiOutlineFileImage } from "react-icons/ai";
+import { AiOutlineLink, AiOutlineCaretRight } from "react-icons/ai";
+
+const temppostData = [
+  {
+    postId: 123,
+    username: "John Doe",
+    avatar: "Images/profile.jpg",
+    images: ["Images/profile.jpg"],
+    likes: 10,
+    comments: 5,
+    postText:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae odio quis ex rhoncus ultricies. Etiam eget neque sed eros finibus aliquet sed nec mi. Morbi vitae aliquet tortor. Cras facilisis vehicula lectus, et finibus ante viverra imperdiet. Fusce nec urna non velit suscipit condimentum. Cras ipsum augue, ultricies a aliquet at, dignissim vel massa. Integer nec quam eu nisl auctor viverra. Aliquam lorem ligula, accumsan in posuere ut, rhoncus et nibh.    ",
+  },
+  {
+    postId: 124,
+    username: "Something",
+    avatar: "Images/profile.jpg",
+    images: ["Images/background.png", "Images/profile.jpg"],
+    likes: 20,
+    comments: 7,
+    postText:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae odio quis ex rhoncus ultricies. Etiam eget neque sed eros finibus aliquet sed nec mi. Morbi vitae aliquet tortor. Cras facilisis vehicula lectus, et finibus ante viverra imperdiet. Fusce nec urna non velit suscipit condimentum. Cras ipsum augue, ultricies a aliquet at, dignissim vel massa. Integer nec quam eu nisl auctor viverra. Aliquam lorem ligula, accumsan in posuere ut, rhoncus et nibh.    ",
+  },
+  {
+    postId: 125,
+    username: "John Doe",
+    avatar: "Images/profile.jpg",
+    images: ["Images/profile.jpg"],
+    likes: 10,
+    comments: 5,
+    postText:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae odio quis ex rhoncus ultricies. Etiam eget neque sed eros finibus aliquet sed nec mi. Morbi vitae aliquet tortor. Cras facilisis vehicula lectus, et finibus ante viverra imperdiet. Fusce nec urna non velit suscipit condimentum. Cras ipsum augue, ultricies a aliquet at, dignissim vel massa. Integer nec quam eu nisl auctor viverra. Aliquam lorem ligula, accumsan in posuere ut, rhoncus et nibh.    ",
+  },
+  {
+    postId: 126,
+    username: "Something",
+    avatar: "Images/profile.jpg",
+    images: ["Images/background.png"],
+    likes: 20,
+    comments: 7,
+    postText:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae odio quis ex rhoncus ultricies. Etiam eget neque sed eros finibus aliquet sed nec mi. Morbi vitae aliquet tortor. Cras facilisis vehicula lectus, et finibus ante viverra imperdiet. Fusce nec urna non velit suscipit condimentum. Cras ipsum augue, ultricies a aliquet at, dignissim vel massa. Integer nec quam eu nisl auctor viverra. Aliquam lorem ligula, accumsan in posuere ut, rhoncus et nibh.    ",
+  },
+];
 
 const Dashboard = () => {
+  const [postData, setPostData] = useState(temppostData);
   const navigate = useNavigate();
   const [comp, setComp] = useState("");
   const [opened, setOpened] = useState("home");
   const [openDrawer, setOpenDrawer] = useState(false);
+
+  const [newPostText, setNewPostText] = useState("");
   const screenSize = useScreenSize();
   function handleAdminClick() {
     navigate("/approval");
@@ -37,6 +85,33 @@ const Dashboard = () => {
   function handleSavedClick() {
     navigate("/saved");
   }
+
+  function handleInputTextChange(e) {
+    // console.log(e);
+    const { value } = e.target;
+    // console.log(id, " ", value);
+    setNewPostText(value);
+  }
+
+  function handleAddPost() {
+    if (newPostText === "") {
+      console.log("No Text Entered in input field");
+      return;
+    }
+    const obj = {
+      postId: Math.round(Math.random() * 1000),
+      username: "John Doe",
+      avatar: "Images/profile.jpg",
+      images: ["Images/profile.jpg"],
+      likes: 0,
+      comments: 0,
+      postText: newPostText,
+    };
+    setPostData((data) => [obj, ...data]);
+    setNewPostText("");
+    console.log(obj);
+  }
+
   return (
     <div className="overflow-hidden">
       <div>
@@ -87,7 +162,7 @@ const Dashboard = () => {
                     🔔
                   </button>
                 </li>
-              
+
                 <li>
                   <button className="flex justify-between w-full bg-blue-900 hover:bg-blue-700 text-white px-4 py-2 rounded-xl focus:outline-none">
                     <div>Saved Items</div> 🏷️
@@ -117,13 +192,13 @@ const Dashboard = () => {
         {screenSize.width < 820 && (
           <div
             className={`${
-              openDrawer ? " text-white bg-[#163560]" : "w-1/12 text-black"
-            }`}
+              openDrawer ? " text-white bg-[#163560]" : "w-1/12 text-black "
+            } `}
           >
-            <ul>
+            <ul className="">
               {/* Box to open */}
               <li
-                className="p-2 flex"
+                className="p-2 flex cursor-pointer hover:bg-blue-700"
                 onClick={() => {
                   setOpenDrawer((prev) => !prev);
                 }}
@@ -181,7 +256,7 @@ const Dashboard = () => {
               </li>
               {/* Home Button */}
               <li
-                className="p-2 flex"
+                className="p-2 flex cursor-pointer hover:bg-blue-700"
                 onClick={() => {
                   navigate("/dashboard");
                 }}
@@ -204,7 +279,7 @@ const Dashboard = () => {
               </li>
               {/* Messages */}
               <li
-                className="p-2 flex"
+                className="p-2 flex cursor-pointer hover:bg-blue-700"
                 onClick={() => {
                   navigate("/messages");
                 }}
@@ -275,7 +350,7 @@ const Dashboard = () => {
                 {openDrawer && <div className="px-2">Messages</div>}
               </li>
               {/* Archive */}
-              <li className="p-2 flex">
+              <li className="p-2 flex cursor-pointer hover:bg-blue-700">
                 <div className="p-[1px]">
                   {openDrawer ? (
                     <svg
@@ -343,7 +418,7 @@ const Dashboard = () => {
               </li>
               {/* Profile */}
               <li
-                className="p-2 flex"
+                className="p-2 flex cursor-pointer hover:bg-blue-700"
                 onClick={() => {
                   navigate("/profile");
                 }}
@@ -400,7 +475,7 @@ const Dashboard = () => {
                 {openDrawer && <div className="px-2">Profile</div>}
               </li>
               {/* Events */}
-              <li className="p-2 flex">
+              <li className="p-2 flex cursor-pointer hover:bg-blue-700">
                 <div className="p-[1px]">
                   {openDrawer ? (
                     <svg
@@ -446,40 +521,73 @@ const Dashboard = () => {
 
           {comp !== "notification" && (
             <div className="w-4/5 mx-auto border overflow-y ">
-              <Post
-                username="John Doe"
-                avatar="Images/profile.jpg"
-                images={[
-                  "Images/profile.jpg",
+              <div className="bg-white p-4 pb-2 rounded-xl mb-4 ">
+                <div className="flex items-center mb-3 align-top">
+                  <img
+                    src="Images/profile.jpg"
+                    alt={` avatar`}
+                    className="w-10 h-10 rounded-full object-cover mr-3"
+                  />
+                  <div className="w-full">
+                    <div>
+                      <input
+                        type="text"
+                        value={newPostText}
+                        onChange={(e) => handleInputTextChange(e)}
+                        className="bg-slate-200 p-3 rounded-3xl w-full font-semibold placeholder:text-stone-600"
+                        placeholder="Start A Post"
+                      ></input>
+                    </div>
 
-                  // Add more image URLs as needed
-                ]}
-                likes={10}
-                comments={5}
-              />
+                    <div className="flex justify-between">
+                      <div className="flex">
+                        <div className="cursor-pointer mx-2">
+                          <div className="flex p-2 mt-2">
+                            <div>
+                              <AiOutlineFileImage size={22} />
+                            </div>
+                            <div className="pl-1">Add Image</div>
+                          </div>
+                        </div>
+                        <div className="cursor-pointer mx-2">
+                          <div className="flex p-2 mt-2">
+                            <div>
+                              <AiOutlineLink size={22} />
+                            </div>
+                            <div className="pl-1">Add Link</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        className="cursor-pointer mx-2"
+                        onClick={(e) => handleAddPost(e)}
+                      >
+                        <div className="flex p-2 ">
+                          <div className="p-2 bg-slate-100 rounded-xl">
+                            Add Post
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-              <Post
-                username="John Doe"
-                avatar="Images/profile.jpg"
-                images={[
-                  "Images/profile.jpg",
-
-                  // Add more image URLs as needed
-                ]}
-                likes={10}
-                comments={5}
-              />
-              <Post
-                username="John Doe"
-                avatar="Images/profile.jpg"
-                images={[
-                  "Images/profile.jpg",
-
-                  // Add more image URLs as needed
-                ]}
-                likes={10}
-                comments={5}
-              />
+              {postData.map((post, id) => {
+                // console.log(post);
+                return (
+                  <Post
+                    key={id}
+                    username={post.username}
+                    avatar={post.avatar}
+                    images={post.images}
+                    likes={post.likes}
+                    comments={post.comments}
+                    postText={post.postText}
+                    postId={post.postId}
+                  />
+                );
+              })}
             </div>
           )}
 

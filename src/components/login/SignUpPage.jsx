@@ -13,19 +13,50 @@ import { IoClose } from "react-icons/io5";
 // activeUser = 2 : Faculty Login
 // activeUser = 3 : Alumni Login
 
+const InitialRegisterState = {
+  type: "Student",
+  userID: "",
+  name: "",
+  email: "",
+  phoneNumber: "",
+  DOB: "",
+  password: "",
+};
+
 const SignUpPage = () => {
   const navigate = useNavigate();
   const [activeUser, setactiveUser] = useState(1);
   const [imageOpacity, setImageOpacity] = useState(100);
 
+  const [user, setUser] = useState(InitialRegisterState);
+
+  function handleChange(e) {
+    // console.log(e);
+    const { id, value } = e.target;
+    // console.log(id, " ", value);
+    setUser({
+      ...user,
+      [id]: value,
+    });
+  }
+
   const handleButtonClick = (buttonNumber) => {
+    const type =
+      buttonNumber === 1
+        ? "Student"
+        : buttonNumber === 2
+        ? "Faculty"
+        : "Alumni";
+    setUser({ type: type });
     setactiveUser(buttonNumber);
     setImageOpacity(0);
     setTimeout(() => setImageOpacity(1), 100);
   };
   const [showOtpModal, setShowOtpModal] = useState(false);
   const handleRegisterClick = () => {
+    console.log(user);
     setShowOtpModal(true);
+    setUser(InitialRegisterState);
   };
   const onOtpSubmit = () => {
     // alert("Login Successfull");
@@ -74,14 +105,14 @@ const SignUpPage = () => {
           )}
         </div>
         {/* Form */}
-        <div className="bg-white w-3/6 h-11/12  shadow-xl rounded-3xl p-7 m-10 flex flex-col items-center">
+        <div className="bg-white w-3/6 h-11/12  shadow-xl rounded-3xl p-3 m-6 flex flex-col items-center">
           <div className="bg-blue-100 rounded-full w-5/6 flex justify-center relative">
             {/* Sliding Button */}
             <button
-              className="  absolute left-0 top-0 w-1/3"
+              className=" absolute left-0 top-0 w-1/3"
               style={{
                 borderRadius: "999px",
-                padding: 20,
+                // padding: 20,
                 marginLeft:
                   activeUser === 1 ? "0" : activeUser === 2 ? "33%" : "67%",
                 transition: "all 0.3s ease-in-out",
@@ -108,7 +139,7 @@ const SignUpPage = () => {
                 border: "none",
                 borderRadius: "999px",
                 cursor: "pointer",
-                padding: 20,
+                // padding: 20,
                 transition: "all 0.2s ease-in-out",
                 color: activeUser !== 1 ? "black" : "rgba(0, 0, 0, 0)",
                 ":hover": {
@@ -128,7 +159,7 @@ const SignUpPage = () => {
                 border: "none",
                 borderRadius: "999px",
                 cursor: "pointer",
-                padding: 20,
+                // padding: 20,
                 transition: "all 0.2s ease-in-out",
                 color: activeUser !== 2 ? "black" : "rgba(0, 0, 0, 0)",
                 ":hover": {
@@ -148,7 +179,7 @@ const SignUpPage = () => {
                 border: "none",
                 borderRadius: "999px",
                 cursor: "pointer",
-                padding: 13,
+                // padding: 13,
                 transition: "all 0.2s ease-in-out",
                 color: activeUser !== 3 ? "black" : "rgba(0, 0, 0, 0)",
                 ":hover": {
@@ -165,40 +196,79 @@ const SignUpPage = () => {
           <div className="w-4/6 mt-4 flex flex-col p-3 text-blue-900 -m-3">
             <p className="font-bold text-lg p-2">Name</p>
             <input
+              required
               type="text"
               id="name"
               name="name"
-              placeholder="Rohit Sharma"
+              placeholder="Your Name"
+              value={user.name}
+              onChange={(e) => handleChange(e)}
+              className="px-4 py-2 border border-slate-500 text-blue-900 font-semibold shadow-sm rounded-full "
+            />
+            <p className="font-bold text-lg p-2">
+              {activeUser === 1
+                ? "Student"
+                : activeUser === 2
+                ? "Faculty"
+                : "Alumni"}{" "}
+              ID
+            </p>
+            <input
+              required
+              type="number"
+              id="userID"
+              name="userID"
+              placeholder={`Enter your ${
+                activeUser === 1
+                  ? "Student"
+                  : activeUser === 2
+                  ? "Faculty"
+                  : "Alumni"
+              } ID`}
+              value={user.userID}
+              onChange={(e) => handleChange(e)}
               className="px-4 py-2 border border-slate-500 text-blue-900 font-semibold shadow-sm rounded-full "
             />
             <p className="font-bold text-lg p-2">Email</p>
             <input
-              type="text"
-              id="username"
-              name="username"
-              placeholder="rohit@gmail.com"
+              required
+              type="email"
+              id="email"
+              name="email"
+              value={user.email}
+              onChange={(e) => handleChange(e)}
+              placeholder="Your Email Address"
               className="px-4 py-2 border border-slate-500 text-blue-900 font-semibold shadow-sm rounded-full "
             />
             <p className="font-bold text-lg p-2">Phone Number</p>
             <input
-              type="text"
+              required
+              type="number"
               id="phoneNumber"
               name="phoneNumber"
-              placeholder="9876543210"
+              value={user.phoneNumber}
+              onChange={(e) => handleChange(e)}
+              placeholder="Your Phone Number"
               className="px-4 py-2 border border-slate-500 text-blue-900 font-semibold shadow-sm rounded-full "
             />
             <p className="font-bold text-lg p-2">Date Of Birth</p>
             <input
+              required
               type="date"
-              id="dob"
-              name="dob"
+              id="DOB"
+              name="DOB"
+              value={user.DOB}
+              onChange={(e) => handleChange(e)}
               className="px-4 py-2 border border-slate-500 text-blue-900 font-semibold shadow-sm rounded-full "
             />
             <p className="font-bold text-lg p-2">Password</p>
             <input
+              required
               type="password"
               id="password"
               name="password"
+              value={user.password}
+              onChange={(e) => handleChange(e)}
               placeholder="Password"
               className="px-4 py-2 border border-slate-500 text-blue-900 font-semibold shadow-sm rounded-full "
             />

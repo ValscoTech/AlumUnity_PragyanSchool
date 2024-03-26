@@ -54,7 +54,7 @@ const Notification = () => {
 
   return (
     <div>
-      <div
+      {/* <div
         style={{ backgroundColor: "rgb(22, 53, 96)" }}
         className="p-3 flex items-center justify-between"
       >
@@ -77,7 +77,7 @@ const Notification = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className=" mx-auto bg-white rounded-md overflow-hidden shadow-md p-6">
         <div className="mt-2">
@@ -119,16 +119,13 @@ const Notification = () => {
                     Follow Back
                   </button>
                 ) : (
-                  
-                    <button
+                  <button
                     onClick={() => handleAction(notification.id, "View")}
                     className="text-xs  px-8 text-gray-200 focus:outline-none"
                     style={{ margin: "0 5px" }} // Adjust margin for alignment
                   >
                     View
                   </button>
-                  
-                  
                 )}
 
                 <button
