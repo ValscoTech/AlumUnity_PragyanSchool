@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
-import { FiBell, FiMic, FiMicOff, FiPhone, FiMail } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import { FiBell } from "react-icons/fi";
 import { FaSearch } from "react-icons/fa";
 import ChatSnippet from "./ChatSnippet";
 import NoProfile from "../../assets/images/message/groupiconwhite.png";
@@ -49,10 +49,6 @@ const MessageBoard = () => {
   const [searchText, setSearchText] = useState("");
   const [clickMessage, setclickMessage] = useState("");
   const [chatOpened, setChatOpended] = useState({});
-  const [recordedAudioURL, setRecordedAudioURL] = useState("");
-  const [filteredChatList, setFilteredChatList] = useState(chatList);
-  const [showProfilePanel, setShowProfilePanel] = useState(false);
-  const profilePanelRef = useRef(null);
 
   useEffect(() => {
     function scrollDown() {
@@ -75,64 +71,6 @@ const MessageBoard = () => {
       ]);
       setNewMessage("");
     }
-  };
-
-  const [isRecording, setIsRecording] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState(null);
-
-  const handleAudioRecord = async () => {
-    if (!isRecording) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const recorder = new MediaRecorder(stream);
-        const chunks = [];
-  
-        recorder.ondataavailable = (e) => {
-          chunks.push(e.data);
-        };
-  
-        recorder.onstop = () => {
-          const blob = new Blob(chunks, { type: 'audio/wav' });
-          const audioURL = URL.createObjectURL(blob);
-          setRecordedAudioURL(audioURL);
-        };
-  
-        recorder.start();
-        setMediaRecorder(recorder);
-        setIsRecording(true);
-        console.log("Recording started...");
-      } catch (error) {
-        console.error('Error accessing microphone:', error);
-      }
-    } else {
-      mediaRecorder.stop();
-      setIsRecording(false);
-      console.log("Recording stopped...");
-    }
-  };
-
-  const handleSearch = () => {
-    const filteredChats = chatList.filter(chat =>
-      chat.name.toLowerCase().includes(searchText.toLowerCase())
-    );
-    setFilteredChatList(filteredChats);
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profilePanelRef.current && !profilePanelRef.current.contains(event.target)) {
-        setShowProfilePanel(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  const toggleProfilePanel = () => {
-    setShowProfilePanel(!showProfilePanel);
   };
 
   const handleChatClick = (e, chat) => {
@@ -232,23 +170,22 @@ const MessageBoard = () => {
               <button
                 style={{ color: "#778CAB" }}
                 className="absolute right-1 bg-gray-100"
-                onClick={handleSearch} // Call handleSearch function on button click
               >
                 <FaSearch />
               </button>
             </div>
           </div>
           <div>
-          {filteredChatList.map((chat, index) => (
-            <ChatSnippet
-              key={index}
-              profileImage={chat.profileImage}
-              name={chat.name}
-              designation={chat.Designation}
-              onClick={(e) => handleChatClick(e, chat)}
-            />
-          ))}
-        </div>
+            {chatList.map((chat, index) => (
+              <ChatSnippet
+                key={index}
+                profileImage={chat.profileImage}
+                name={chat.name}
+                designation={chat.Designation}
+                onClick={(e) => handleChatClick(e, chat)}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Chat Panel */}
@@ -258,9 +195,7 @@ const MessageBoard = () => {
               style={{ backgroundColor: "#204C89" }}
               className="h-16 p-1 flex items-center"
             >
-              <button onClick={toggleProfilePanel} style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }}>
-                <img src={NoProfile} className="w-12 h-12"></img>
-              </button>
+              <img src={NoProfile} className="w-12 h-12"></img>
               <h2 className="text-white ml-4">{clickMessage}</h2>
             </div>
             <div className={`flex-1`}>
@@ -301,9 +236,6 @@ const MessageBoard = () => {
               </div>
             </div>
 
-            {/* Audio Player - To replay the recorded audio */}
-            {/* <audio controls src={recordedAudioURL} className="my-2" /> */}
-
             <div className="bg-white sticky inset-x-0 bottom-0 flex p-2 ">
               <div className="flex px-4 w-full mx-auto gap-2">
                 <label htmlFor="fileInput">
@@ -324,14 +256,6 @@ const MessageBoard = () => {
                   placeholder="Type your message..."
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
                 />
-                
-                <button
-                  onClick={handleAudioRecord}
-                  className="bg-blue-500 px-4 py-2 text-white rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                >
-                  {isRecording ? <FiMicOff className="text-white" /> : <FiMic className="text-white" />}
-                </button>
-
                 <button
                   onClick={handleSendMessage}
                   className="bg-blue-500 px-4 py-2 text-white rounded-md focus:outline-none focus:ring focus:border-blue-300"
@@ -342,42 +266,6 @@ const MessageBoard = () => {
             </div>
           </div>
         )}
-
-        {/* Profile Panel */}
-        {showProfilePanel && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-            <div ref={profilePanelRef} className="fixed right-0 h-full text-white p-4 rounded-l-lg flex flex-col justify-center" style={{backgroundColor: '#1E2D43'}}>
-              <div className="flex items-center mb-4">
-                <img src={NoProfile} alt="Profile" className="w-16 h-16 mr-4" />
-                <div>
-                  <h2 className="text-white">{clickMessage}</h2>
-                  <div className="flex items-center mt-1">
-                    <FiPhone className="text-white mr-2" />
-                    <p>+1234567890</p>
-                  </div>
-                  <div className="flex items-center mt-1">
-                    <FiMail className="text-white mr-2" />
-                    <p>example@example.com</p>
-                  </div>
-                </div>
-              </div>
-              <div className="border-t border-white mt-4 pt-4">
-                <h3 className="text-white">About</h3>
-                <div
-                  className="about-text"
-                  style={{
-                    borderRadius: '10px',
-                    boxShadow: '0 0 5px white',
-                    padding: '10px',
-                  }}
-                >
-                  <p style={{ color: 'white' }}>Lorem ipsum dolor sit amet...</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
       </div>
     </div>
   );
