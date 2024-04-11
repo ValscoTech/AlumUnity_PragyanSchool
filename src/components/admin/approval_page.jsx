@@ -1,12 +1,55 @@
-import React from "react";
+import React, { useState } from "react";
 import tick from "./bluecheckmark.png";
 import ellipse1 from "./ellipse1.png";
 import ellipse2 from "./ellipse2.png";
 import businessman from "./businessman.png";
 import person from "./person.png";
 import NavBar from "../helper/navbar";
-
 import useScreenSize from "../../utils/useScreenSize";
+import styled from "styled-components";
+
+const NotificationBox = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 20px;
+  padding: 20px;
+  z-index: 9999;
+  height: 200px;
+`;
+
+const Overlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+`;
+
+// Styled heading
+const Heading = styled.h3`
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
+  padding-bottom: 70px;
+`;
+
+// Styled button
+const Button = styled.button`
+  padding: 10px 20px;
+  margin-right: 10px;
+  font-size: 16px;
+  border: none;
+  background-color: green;
+  color: white;
+  cursor: pointer;
+`;
 
 const approval_page = () => {
   const screenSize = useScreenSize();
@@ -232,8 +275,31 @@ const approval_page = () => {
   );
 };
 
+const ApprovalNotification = ({
+  userName,
+  onApproveOnlyThisTime,
+  onApproveAlways,
+}) => {
+  return (
+    <>
+      <Overlay />
+      <NotificationBox>
+        <Heading>User Approved</Heading>
+        {/* Buttons */}
+        <Button onClick={onApproveOnlyThisTime}>Approve Only This Time</Button>
+        <Button onClick={onApproveAlways}>Approve Always</Button>
+      </NotificationBox>
+    </>
+  );
+};
+
 const AlumniCards = (props) => {
+  const [showApprovalNotification, setShowApprovalNotification] =
+    useState(false);
+  const [approvedUserName, setApprovedUserName] = useState("");
+
   const screenSize = useScreenSize();
+
   function handleClickApprove() {
     const user = {
       status: "Approved",
@@ -242,8 +308,21 @@ const AlumniCards = (props) => {
       name: props.DisplayName,
     };
     console.log(user);
+    setApprovedUserName(user.userName);
+    setShowApprovalNotification(true);
   }
 
+  function handleApproveOnlyThisTime() {
+    // Handle approve only this time action
+    console.log("Approve only this time");
+    setShowApprovalNotification(false);
+  }
+
+  function handleApproveAlways() {
+    // Handle approve always action
+    console.log("Approve always");
+    setShowApprovalNotification(false);
+  }
   function handleClickDeny() {
     const user = {
       status: "Denied",
@@ -302,6 +381,13 @@ const AlumniCards = (props) => {
             >
               Approve
             </button>
+            {showApprovalNotification && (
+              <ApprovalNotification
+                userName={approvedUserName}
+                onApproveOnlyThisTime={handleApproveOnlyThisTime}
+                onApproveAlways={handleApproveAlways}
+              />
+            )}
           </div>
           <div className="px-4">
             <button
