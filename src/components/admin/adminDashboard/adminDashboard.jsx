@@ -1,212 +1,284 @@
+import React, { useState, useEffect } from "react";
 import NavBar from "../../helper/navbar";
-import { Fragment, useState } from "react";
+import { Table, Space } from "antd";
 import useScreenSize from "../../../utils/useScreenSize";
-
-const FacultyTableData = [
-  {
-    Name: "Fac1",
-    Reg_No: "Something",
-    DOR: "12/12/12",
-    Username: "something123",
-  },
-  {
-    Name: "Fac1",
-    Reg_No: "Something",
-    DOR: "12/12/12",
-    Username: "something123",
-  },
-  {
-    Name: "Fac1",
-    Reg_No: "Something",
-    DOR: "12/12/12",
-    Username: "something123",
-  },
-  {
-    Name: "Fac1",
-    Reg_No: "Something",
-    DOR: "12/12/12",
-    Username: "something123",
-  },
-  {
-    Name: "Fac1",
-    Reg_No: "Something",
-    DOR: "12/12/12",
-    Username: "something123",
-  },
-];
-
-const alumniTableData = [
-  {
-    Name: "Alumni1",
-    Reg_No: "Something",
-    DOR: "12/12/12",
-    Username: "somethingAlum123",
-  },
-  {
-    Name: "Alumni1",
-    Reg_No: "Something",
-    DOR: "12/12/12",
-    Username: "somethingAlum123",
-  },
-  {
-    Name: "Alumni1",
-    Reg_No: "Something",
-    DOR: "12/12/12",
-    Username: "somethingAlum123",
-  },
-  {
-    Name: "Alumni1",
-    Reg_No: "Something",
-    DOR: "12/12/12",
-    Username: "somethingAlum123",
-  },
-  {
-    Name: "Alumni1",
-    Reg_No: "Something",
-    DOR: "12/12/12",
-    Username: "somethingAlum123",
-  },
-];
-
-const studentTableData = [
-  {
-    Name: "Navin",
-    Reg_No: "21bce3310",
-    DOR: "12/12/12",
-    Username: "nvnie123",
-  },
-  {
-    Name: "Navin",
-    Reg_No: "21bce3310",
-    DOR: "12/12/12",
-    Username: "nvnie123",
-  },
-  {
-    Name: "Navin",
-    Reg_No: "21bce3310",
-    DOR: "12/12/12",
-    Username: "nvnie123",
-  },
-  {
-    Name: "Navin",
-    Reg_No: "21bce3310",
-    DOR: "12/12/12",
-    Username: "nvnie123",
-  },
-  {
-    Name: "Navin",
-    Reg_No: "21bce3310",
-    DOR: "12/12/12",
-    Username: "nvnie123",
-  },
-  {
-    Name: "Navin",
-    Reg_No: "21bce3310",
-    DOR: "12/12/12",
-    Username: "nvnie123",
-  },
-  {
-    Name: "Navin",
-    Reg_No: "21bce3310",
-    DOR: "12/12/12",
-    Username: "nvnie123",
-  },
-  {
-    Name: "Navin",
-    Reg_No: "21bce3310",
-    DOR: "12/12/12",
-    Username: "nvnie123",
-  },
-];
+import RiseLoader from "react-spinners/RiseLoader";
 
 const QueryComponent = () => {
   return (
-    <div className="pt-9">
-      <div className=" bg-slate-300 rounded-xl px-6  m-0 text-blue-900 p-2  font-extrabold">
-        Queries and Complaints
-        <div>
-          <ul>
-            <li className="text-black py-3 pt-6 font-semibold">
-              - Regarding portal technicalities
-            </li>
-            <li className="text-black py-3 font-semibold">
-              - Annual day delay announcement
-            </li>
-            <li className="text-black py-3 font-semibold">
-              - Exam dates postponement due to annual day celebrations
-            </li>
-          </ul>
+    <div className="w-1/2 p-2">
+      <div className="pt-9">
+        <div className="bg-slate-300 rounded-xl px-6 m-0 text-blue-900 p-2 font-extrabold">
+          Queries and Complaints.
+          <div>
+            <ul>
+              <li className="text-black py-3 pt-6 font-semibold">
+                - Regarding portal technicalities.
+              </li>
+              <li className="text-black py-3 font-semibold">
+                - Annual day delay announcement.
+              </li>
+              <li className="text-black py-3 font-semibold">
+                - Exam dates postponement due to annual day celebrations.
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-function Table(data, buttonValue) {
-  const screenSize = useScreenSize();
+const override = {
+  display: "flex",
+  justifyContent:"center",
+  margin: "0 auto",
+  borderColor: "blue",
+  
 
-  function handleApprove(e, data, index) {
-    const user = {
-      status: "Approved",
-      data,
-      type: index === 0 ? "Student" : index === 1 ? "Faculty" : "Alumni",
-    };
-    console.log(user);
-  }
-
-  function handleDeny(e, data, index) {
-    const user = {
-      status: "Denied",
-      data,
-      type: index === 0 ? "Student" : index === 1 ? "Faculty" : "Alumni",
-    };
-    console.log(user);
-  }
-
-  return data.map((data, index) => {
-    return (
-      <Fragment key={index}>
-        <div className="p-2 font-bold">{index + 1}</div>
-        <div className="p-2 lg:col-span-3 col-span-2 font-bold truncate">
-          {data.Name}
-        </div>
-        <div className="p-2 col-span-2 font-bold truncate">{data.Reg_No}</div>
-        <div className="p-2 col-span-2 font-bold truncate">{data.DOR}</div>
-        <div className="p-2 col-span-2 font-bold truncate">{data.Username}</div>
-        <div className="p-2 col-span-2 font-bold flex">
-          <ul className="flex gap-1">
-            <li
-              className="rounded-full px-2 py-1 bg-[#247000] cursor-pointer text-white hover:bg-[#319a00]"
-              onClick={(e) => handleApprove(e, data, buttonValue)}
-            >
-              {screenSize.width > 800 ? "Approve" : "✔️"}
-            </li>
-            <li
-              className="rounded-full px-2 py-1 bg-[#FF0000] cursor-pointer text-white hover:bg-[#bb0000]"
-              onClick={(e) => handleDeny(e, data, buttonValue)}
-            >
-              {screenSize.width > 800 ? "Deny" : "X"}
-            </li>
-          </ul>
-        </div>
-      </Fragment>
-    );
-  });
-}
+};
 
 const AdminDashboard = () => {
   const screenSize = useScreenSize();
   const [selectedButton, setSelectedButton] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 500); // Adjust the timeout value as needed
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const facultyTableData = [
+    {
+      key: 1,
+      Name: "Fac1",
+      Reg_No: "Something",
+      DOR: "12/12/12",
+      Username: "something123",
+    },
+    {
+      key: 2,
+      Name: "Fac2",
+      Reg_No: "Something",
+      DOR: "12/12/12",
+      Username: "something123",
+    },
+    {
+      key: 3,
+      Name: "Fac3",
+      Reg_No: "Something",
+      DOR: "12/12/12",
+      Username: "something123",
+    },
+    {
+      key: 4,
+      Name: "Fac4",
+      Reg_No: "Something",
+      DOR: "12/12/12",
+      Username: "something123",
+    },
+    {
+      key: 5,
+      Name: "Fac5",
+      Reg_No: "Something",
+      DOR: "12/12/12",
+      Username: "something123",
+    },
+     
+  ];
+
+  const alumniTableData = [
+    {
+      key: 1,
+      Name: "Alumni1",
+      Reg_No: "Something",
+      DOR: "12/12/12",
+      Username: "somethingAlum123",
+    },
+    {
+      key: 2,
+      Name: "Alumni2",
+      Reg_No: "Something",
+      DOR: "12/12/12",
+      Username: "somethingAlum123",
+    },
+    {
+      key: 3,
+      Name: "Alumni3",
+      Reg_No: "Something",
+      DOR: "12/12/12",
+      Username: "somethingAlum123",
+    },
+    {
+      key: 4,
+      Name: "Alumni4",
+      Reg_No: "Something",
+      DOR: "12/12/12",
+      Username: "somethingAlum123",
+    },
+    {
+      key: 5,
+      Name: "Alumni5",
+      Reg_No: "Something",
+      DOR: "12/12/12",
+      Username: "somethingAlum123",
+    },
+     
+  ];
+
+
+  const studentTableData = [
+    {
+      key: 1,
+      Name: "Navin",
+      Reg_No: "21bce3310",
+      DOR: "12/12/12",
+      Username: "nvnie123",
+    },
+    {
+      key: 2,
+      Name: "Navin2",
+      Reg_No: "21bce3310",
+      DOR: "12/12/12",
+      Username: "nvnie123",
+    },
+    {
+      key: 3,
+      Name: "Navin",
+      Reg_No: "21bce3310",
+      DOR: "12/12/12",
+      Username: "nvnie123",
+    },
+    {
+      key: 4,
+      Name: "Navin",
+      Reg_No: "21bce3310",
+      DOR: "12/12/12",
+      Username: "nvnie123",
+    },
+    {
+      key: 5,
+      Name: "Navin",
+      Reg_No: "21bce3310",
+      DOR: "12/12/12",
+      Username: "nvnie123",
+    },
+    {
+      key: 6,
+      Name: "Navin",
+      Reg_No: "21bce3310",
+      DOR: "12/12/12",
+      Username: "nvnie123",
+    },
+    {
+      key: 7,
+      Name: "Navin",
+      Reg_No: "21bce3310",
+      DOR: "12/12/12",
+      Username: "nvnie123",
+    },
+    {
+      key: 9,
+      Name: "Navin",
+      Reg_No: "21bce3310",
+      DOR: "12/12/12",
+      Username: "nvnie123",
+    },
+
+     
+  ];
+
+
+  const columns = [
+    {
+      title: "S.No",
+    dataIndex: "key",
+    render: (_, record, index) => <span className="text-black">{index + 1}</span>,
+      //render: (index) => <a>{index}</a>,
+      
+    },
+    {
+      title: "Name",
+      dataIndex: "Name",
+      key: "Name",
+      render: (text) => <a>{text}</a>,
+    },
+    {
+      title: "Reg.No",
+      dataIndex: "Reg_No",
+      key: "Reg_No",
+    },
+    {
+      title: "Date Of Registration",
+      dataIndex: "DOR",
+      key: "DOR",
+    },
+    {
+      title: "Username",
+      key: "Username",
+      dataIndex: "Username",
+    },
+    {
+      title: "Approve/Deny",
+      key: "action",
+      render: (_, record) => (
+        <Space size="large">
+          <a className="rounded-full px-2 py-1 bg-[#247000] cursor-pointer text-white hover:bg-[#319a00]" onClick={() => handleApprove(record)}>Approve</a>
+          <a className="rounded-full px-2 py-1 bg-[#FF0000] cursor-pointer text-white hover:bg-[#bb0000]"onClick={() => handleDeny(record)}>Deny</a>
+        </Space>
+      ),
+    },
+  ];
+
+
+  const handleApprove = (record) => {
+    console.log("Approved:", record);
+     
+  };
+
+  const handleDeny = (record) => {
+    console.log("Denied:", record);
+    
+  };
+
+  const filterData = (data) => {
+    return data.filter((item) =>
+      Object.values(item).some((value) =>
+        value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    );
+  };
+
+  const getData = () => {
+    let data;
+    switch (selectedButton) {
+      case 0:
+        data = filterData(studentTableData);
+        break;
+      case 1:
+        data = filterData(facultyTableData);
+        break;
+      case 2:
+        data = filterData(alumniTableData);
+        break;
+      default:
+        data = [];
+    }
+    return data;
+  };
+
   return (
     <>
-      <div>
-        <NavBar></NavBar>
-      </div>
+      <NavBar />
       <div className="bg-indigo-100 h-dvh">
-        <div className={`bg-indigo-100 min-h-[${screenSize.height}px]`}>
-          <div className="w-11/12  mx-auto">
+      <div className={`bg-[#f1f1f1] min-h-[${screenSize.height}px]`}>
+          <div className="w-11/12 mx-auto">
             <div className="flex pt-4">
-              <div className="text-6xl  text-gray-500 font-bold pb-7 pt-4 w-11/12">
+              <div className="text-6xl text-gray-500 font-bold pb-7 pt-4 w-11/12">
                 Dashboard
                 <div className="flex justify-evenly text-2xl">
                   <ul className="flex lg:gap-16 md:gap-10 gap-3 py-4">
@@ -243,10 +315,9 @@ const AdminDashboard = () => {
                   </ul>
                 </div>
                 <div>
-                  <div className=" flex  w-1/2 h-1 text-white ">
-                    <form className="relative ">
+                  <div className="flex w-1/2 h-1 text-white">
+                    <form className="relative">
                       <div
-                        className=""
                         style={{
                           position: "absolute",
                           left: "10px",
@@ -278,6 +349,8 @@ const AdminDashboard = () => {
                         }}
                         placeholder="Enter Name"
                         type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                       />
                     </form>
                   </div>
@@ -285,47 +358,26 @@ const AdminDashboard = () => {
               </div>
               {screenSize.width > 900 && <QueryComponent />}
             </div>
-
-            <div className="mt-10 lg:text-xl  md:text-lg  text-sm">
-              <div className="grid lg:grid-cols-12  grid-cols-11 gap-x-2">
-                <div className="p-2 font-bold truncate">S.No</div>
-                <div className="p-2 lg:col-span-3 col-span-2 font-bold truncate">
-                  Name
-                </div>
-                <div className="p-2 col-span-2 font-bold truncate">Reg.No</div>
-                <div className="p-2 col-span-2 font-bold truncate">
-                  Date of Registration
-                </div>
-                <div className="p-2 col-span-2 font-bold truncate">
-                  Username
-                </div>
-                <div className="p-2 col-span-2 font-bold truncate">
-                  Approve/Deny
-                </div>
-
-                {selectedButton === 0 &&
-                  Table(studentTableData, selectedButton)}
-                {selectedButton === 1 &&
-                  Table(FacultyTableData, selectedButton)}
-                {selectedButton === 2 && Table(alumniTableData, selectedButton)}
-              </div>
+            <div className="bg-[#f1f1f1]">
+              {loading ? (
+                <RiseLoader
+                  loading={loading}
+                  cssOverride={override}
+                  size={15}
+                  aria-label="Loading Spinner"
+                  data-testid="loader"
+                />
+              ) : (
+                <Table columns={columns} dataSource={getData()}  />
+              )}
             </div>
+
             {screenSize.width < 900 && (
               <div className="w-1/2 p-2">
                 <QueryComponent />
               </div>
             )}
           </div>
-          {/* <div className="static">
-          <div
-            style={{ background: "#163560" }}
-            className="h-40 w-40 rounded-full absolute bottom-0 left-0"
-          ></div>
-          <div
-            style={{ background: "black", opacity: "50%" }}
-            className="h-28 w-80 rounded-3xl absolute bottom-0 left-80"
-          ></div>{" "}
-        </div> */}
         </div>
       </div>
     </>
