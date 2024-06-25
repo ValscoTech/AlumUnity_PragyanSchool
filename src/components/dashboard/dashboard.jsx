@@ -1,69 +1,86 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import Post from "../helper/post";
 import { useNavigate } from "react-router-dom";
 import DashBoardNavBar from "../helper/DashBoardNavBar";
 import { useState } from "react";
 import Notification from "../notification/notification";
 import useScreenSize from "../../utils/useScreenSize";
-import { AiOutlineFileImage } from "react-icons/ai";
 import { TiMessages } from "react-icons/ti";
 import { IoIosNotificationsOutline } from "react-icons/io";
 import { AiOutlinePlus } from "react-icons/ai";
 import { MdOutlineBookmarkBorder } from "react-icons/md";
 import { FaArrowRight } from "react-icons/fa";
-import { AiOutlineLink, AiOutlineCaretRight } from "react-icons/ai";
+import "react-quill/dist/quill.snow.css";
+import { Modal, Button, Input } from "semantic-ui-react";
+import "semantic-ui-css/semantic.min.css";
+import { useRef } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
 
-const temppostData = [
-  {
-    postId: 123,
-    username: "John Doe",
-    avatar: "Images/profile.jpg",
-    images: ["Images/profile.jpg"],
-    likes: 10,
-    comments: 5,
-    postText:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae odio quis ex rhoncus ultricies. Etiam eget neque sed eros finibus aliquet sed nec mi. Morbi vitae aliquet tortor. Cras facilisis vehicula lectus, et finibus ante viverra imperdiet. Fusce nec urna non velit suscipit condimentum. Cras ipsum augue, ultricies a aliquet at, dignissim vel massa. Integer nec quam eu nisl auctor viverra. Aliquam lorem ligula, accumsan in posuere ut, rhoncus et nibh.    ",
-  },
-  {
-    postId: 124,
-    username: "Something",
-    avatar: "Images/profile.jpg",
-    images: ["Images/background.png", "Images/profile.jpg"],
-    likes: 20,
-    comments: 7,
-    postText:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae odio quis ex rhoncus ultricies. Etiam eget neque sed eros finibus aliquet sed nec mi. Morbi vitae aliquet tortor. Cras facilisis vehicula lectus, et finibus ante viverra imperdiet. Fusce nec urna non velit suscipit condimentum. Cras ipsum augue, ultricies a aliquet at, dignissim vel massa. Integer nec quam eu nisl auctor viverra. Aliquam lorem ligula, accumsan in posuere ut, rhoncus et nibh.    ",
-  },
-  {
-    postId: 125,
-    username: "John Doe",
-    avatar: "Images/profile.jpg",
-    images: ["Images/profile.jpg"],
-    likes: 10,
-    comments: 5,
-    postText:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae odio quis ex rhoncus ultricies. Etiam eget neque sed eros finibus aliquet sed nec mi. Morbi vitae aliquet tortor. Cras facilisis vehicula lectus, et finibus ante viverra imperdiet. Fusce nec urna non velit suscipit condimentum. Cras ipsum augue, ultricies a aliquet at, dignissim vel massa. Integer nec quam eu nisl auctor viverra. Aliquam lorem ligula, accumsan in posuere ut, rhoncus et nibh.    ",
-  },
-  {
-    postId: 126,
-    username: "Something",
-    avatar: "Images/profile.jpg",
-    images: ["Images/background.png"],
-    likes: 20,
-    comments: 7,
-    postText:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae odio quis ex rhoncus ultricies. Etiam eget neque sed eros finibus aliquet sed nec mi. Morbi vitae aliquet tortor. Cras facilisis vehicula lectus, et finibus ante viverra imperdiet. Fusce nec urna non velit suscipit condimentum. Cras ipsum augue, ultricies a aliquet at, dignissim vel massa. Integer nec quam eu nisl auctor viverra. Aliquam lorem ligula, accumsan in posuere ut, rhoncus et nibh.    ",
-  },
-];
+async function handleImageExtraction(fileId) {
+  try {
+    const response = await fetch(`http://localhost:8080/images/${fileId}`);
+    if (response.ok) {
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      return url;
+    } else {
+      return "Images/profile.jpg";
+    }
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
 
 const Dashboard = () => {
-  const [postData, setPostData] = useState(temppostData);
+  const [postData, setPostData] = useState();
   const navigate = useNavigate();
   const [comp, setComp] = useState("");
   const [opened, setOpened] = useState("home");
   const [openDrawer, setOpenDrawer] = useState(false);
+  const { user, authToken } = useContext(AuthContext);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [postText, setPostText] = useState("");
+  const [link, setLink] = useState("");
+  const [image, setImage] = useState(null);
+  const imageInputRef = useRef(null);
+  if (!authToken) {
+    navigate("/login");
+  }
+  async function handleFetchPosts() {
+    const response = await fetch("http://localhost:8080/api/posts");
+    if (response.ok) {
+      const data = await response.json();
+      const structuredData = data.map((data) => {
+        return {
+          postId: data._id,
+          time: data.uploadTime,
+          userName: data.uploadedBy,
+          avatar: "Images/profile.jpg",
+          likes: data.likes,
+          likesCount: data.likes.length,
+          comments: data.commentsCount,
+          postText: data.caption,
+          fileId: data.fileId,
+          link: data.link,
+        };
+      });
+      const postsData = await Promise.all(
+        structuredData.map(async (post) => {
+          const imageUrlArray = [];
+          const imageUrl = await handleImageExtraction(post.fileId);
+          imageUrlArray.push(imageUrl);
 
-  const [newPostText, setNewPostText] = useState("");
+          return { ...post, images: imageUrlArray };
+        })
+      );
+      setPostData(postsData);
+    }
+  }
+  useEffect(() => {
+    handleFetchPosts();
+  }, []);
+
   const screenSize = useScreenSize();
   function handleAdminClick() {
     navigate("/approval");
@@ -87,34 +104,75 @@ const Dashboard = () => {
     navigate("/update");
   }
 
-  function handleSavedClick() {
-    navigate("/saved");
-  }
+  const handleImageClick = () => {
+    if (imageInputRef.current) {
+      imageInputRef.current.click();
+    }
+  };
 
-  function handleInputTextChange(e) {
-    // console.log(e);
-    const { value } = e.target;
-    // console.log(id, " ", value);
-    setNewPostText(value);
-  }
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-  function handleAddPost() {
-    if (newPostText === "") {
-      console.log("No Text Entered in input field");
+  const handlePostSubmit = async () => {
+    const imageInput = imageInputRef.current;
+    const imageFile = imageInput.files[0];
+
+    if (!postText.trim()) {
+      alert("Please enter some text for your post.");
       return;
     }
-    const obj = {
-      postId: Math.round(Math.random() * 1000),
-      username: "John Doe",
-      avatar: "Images/profile.jpg",
-      images: ["Images/profile.jpg"],
-      likes: 0,
-      comments: 0,
-      postText: newPostText,
-    };
-    setPostData((data) => [obj, ...data]);
-    setNewPostText("");
-    console.log(obj);
+
+    if (!imageFile && !link.trim()) {
+      alert("Please add an image or enter a link for your post.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("username", user.name);
+    formData.append("caption", postText);
+    formData.append("link", link);
+
+    if (imageFile) {
+      formData.append("file", imageFile);
+    }
+
+    try {
+      const response = await fetch("http://localhost:8080/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        handleFetchPosts();
+        setIsModalOpen(false);
+        setPostText("");
+        setLink("");
+        setImage(null);
+        console.log("Posting successful");
+      } else {
+        console.error("Failed to create post.");
+        alert("Failed to create post. Please try again later.");
+      }
+    } catch (error) {
+      console.error("Error creating post:", error);
+      alert("Failed to create post. Please try again later.");
+    }
+  };
+
+  const handleAddLink = () => {
+    setIsModalOpen(true);
+  };
+
+  function handleSavedClick() {
+    navigate("/saved");
   }
 
   return (
@@ -134,9 +192,6 @@ const Dashboard = () => {
         {screenSize.width > 820 && (
           <div className="w-80 relative ">
             <div className="w-5/6 relative pt-20 mt-16 rounded-md  bg-backgroundColor-bluecustom  text-white my-7 flex flex-col items-center md:mx-10">
-              {/* <div className="pb-20">
-              <img src="Images/logo.png" alt="" />
-            </div> */}
               <div className="absolute -top-14 z-10 ">
                 <img
                   src="Images/profile.jpg"
@@ -145,8 +200,10 @@ const Dashboard = () => {
                 />
               </div>
               <div className="text-center">
-                <h2 className="font-bold text-lg">John Doe</h2>
-                <p>Pragyan's Alumini</p>
+                <h2 className="font-bold text-lg">
+                  {user && user.name.toUpperCase()}
+                </h2>
+                <p>Pragyan's {user && user.role}</p>
               </div>
               {/* Navigation Menu */}
               <div className="mt-4 w-full">
@@ -174,7 +231,7 @@ const Dashboard = () => {
                   </li>
                   <hr />
                   <li>
-                    <button className="flex justify-between items-center w-full py-2  bg-backgroundColor-bluecustom hover:bg-backgroundColor-bluecustom text-white">
+                    <button className="flex justify-between items-center w-full py-2  bg-backgroundColor-bluecustom  hover:bg-backgroundColor-bluecustom text-white">
                       <div className="text-base">Events</div>{" "}
                       <AiOutlinePlus className="text-xl mr-0.5" />
                     </button>
@@ -544,117 +601,140 @@ const Dashboard = () => {
 
           {comp !== "notification" && (
             <div className="w-11/12 mx-auto overflow-y ">
-              <div className=" p-4 bg-backgroundColor-lightgray shadow-xl rounded-xl mb-4 ">
-                {/* <div>
-                  <div className="flex items-center">
+              <div className="w-2xl mx-auto mt-5">
+                <div className="p-4 rounded-lg shadow-md bg-backgroundColor-lightgray">
+                  <div className="flex items-center my-5">
                     <img
                       src="Images/profile.jpg"
-                      alt={` avatar`}
+                      alt="avatar"
                       className="w-10 h-10 rounded-full object-cover mr-3 border-2 border-black"
                     />
-                    <input
-                      type="text"
-                      value={newPostText}
-                      onChange={(e) => handleInputTextChange(e)}
-                      className="md:p-2 p-1 rounded-3xl md:w-full text-xs md:text-base w-11/12 font-semibold placeholder:text-black bg-backgroundColor-gray"
-                      placeholder="Start A Post"
-                    ></input>
+                    <button
+                      onClick={() => setIsModalOpen(true)}
+                      className="bg-backgroundColor-gray hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-full w-full text-left"
+                    >
+                      Start a post
+                    </button>
                   </div>
-                  <div className="md:flex w-5/6 mx-auto">
-                    <div className="flex md:p-2 items-center text-xs md:text-base pt-2 mt-2">
-                      <div>
-                        <AiOutlineFileImage size={22} />
-                      </div>
-                      <div className="text-xs cursor-pointer">Add Image</div>
-                    </div>
-                    <div className="flex items-center md:p-2 text-xs md:text-base pt-2 mt-2">
-                      <div>
-                        <AiOutlineLink size={22} />
-                      </div>
-                      <div className="pl-1 text-xs cursor-pointer">
-                        Add Link
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="cursor-pointer w-1/2 mx-auto bg-black"
-                    onClick={(e) => handleAddPost(e)}
-                  >
-                    <div className="flex p-2 ">
-                      <div className="p-2 bg-backgroundColor-bluecustom text-white text-xs md:text-base rounded-xl justify-end">
-                        Add Post
-                      </div>
-                    </div>
-                  </div>
-                </div> */}
-                <div className="flex  mb-3 align-top">
-                  <img
-                    src="Images/profile.jpg"
-                    alt={` avatar`}
-                    className="w-10 h-10 rounded-full object-cover mr-3 border-2 border-black"
-                  />
-                  <div className="w-full">
-                    <div>
-                      <input
-                        type="text"
-                        value={newPostText}
-                        onChange={(e) => handleInputTextChange(e)}
-                        className="md:p-3 p-2 rounded-3xl md:w-full text-xs w-11/12 font-semibold placeholder:text-black bg-backgroundColor-gray"
-                        placeholder="Start A Post"
-                      ></input>
-                    </div>
-                    <div className="flex md:justify-between md:flex-row flex-col">
-                      <div className="flex">
-                        <div className="cursor-pointer mx-2">
-                          <div className="flex md:p-2 items-center text-xs md:text-lg pt-2 mt-2">
-                            <div>
-                              <AiOutlineFileImage size={22} />
-                            </div>
-                            <div>Add Image</div>
-                          </div>
-                        </div>
-                        <div className="cursor-pointer mx-2">
-                          <div className="flex items-center md:p-2 text-xs md:text-lg pt-2 mt-2">
-                            <div>
-                              <AiOutlineLink size={22} />
-                            </div>
-                            <div className="pl-1">Add Link</div>
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        className="cursor-pointer mx-2"
-                        onClick={(e) => handleAddPost(e)}
-                      >
-                        <div className="flex p-2 ">
-                          <div className="p-2 bg-slate-100 text-xs md:text-lg rounded-xl">
-                            Add Post
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="flex justify-between space-x-2 mt-3">
+                    <button
+                      onClick={() => setIsModalOpen(true)}
+                      className="flex-1 flex items-center justify-center bg-backgroundColor-bluecustom text-xs sm:text-base text-white hover:bg-gray py-2 px-1 sm:px-4 rounded-lg"
+                    >
+                      <i className="fas fa-image mr-2"></i> Photo
+                    </button>
+                    <button
+                      onClick={() => setIsModalOpen(true)}
+                      className="flex-1 flex items-center justify-center bg-backgroundColor-bluecustom text-xs sm:text-base text-white hover:bg-gray py-2 px-1 sm:px-4 rounded-lg"
+                    >
+                      <i className="fas fa-edit mr-2"></i> Write Article
+                    </button>
+                    <button
+                      onClick={() => setIsModalOpen(true)}
+                      className="flex-1 flex items-center justify-center bg-backgroundColor-bluecustom text-xs sm:text-base text-white hover:bg-gray py-2 px-1 sm:px-4 rounded-lg"
+                    >
+                      <i className="fas fa-link mr-2"></i> Add Link
+                    </button>
                   </div>
                 </div>
+
+                <Modal
+                  open={isModalOpen}
+                  onClose={() => setIsModalOpen(false)}
+                  size="small"
+                  className="mx-3 sm:mx-auto"
+                >
+                  <Modal.Header className="text-xl font-bold">
+                    Create a Post
+                  </Modal.Header>
+                  <Modal.Content className="flex flex-col gap-4">
+                    <div className="flex items-center">
+                      <img
+                        src="Images/profile.jpg"
+                        alt="avatar"
+                        className="w-10 h-10 rounded-full object-cover mr-3 border-2 border-black"
+                      />
+                      <span className="font-semibold">Username</span>
+                    </div>
+                    <textarea
+                      value={postText}
+                      onChange={(e) => setPostText(e.target.value)}
+                      placeholder="What do you want to talk about?"
+                      className="w-full h-40 p-2 border border-gray-300 rounded-lg resize-none"
+                    />
+                    <div className="flex gap-4">
+                      <button
+                        onClick={handleImageClick}
+                        className="flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg"
+                      >
+                        <i className="fas fa-image mr-2"></i> Add Image
+                      </button>
+                      <input
+                        type="file"
+                        ref={imageInputRef}
+                        onChange={handleImageChange}
+                        className="hidden"
+                        accept="image/*"
+                      />
+                      <Input
+                        type="text"
+                        value={link}
+                        onChange={(e) => setLink(e.target.value)}
+                        placeholder="Enter a link"
+                        className="p-2 rounded-lg border border-gray-300"
+                      />
+                    </div>
+                    {image && (
+                      <img
+                        src={image}
+                        alt="Selected"
+                        className="w-full max-h-72 object-cover mt-4 rounded-lg"
+                      />
+                    )}
+                  </Modal.Content>
+                  <Modal.Actions className="flex justify-end gap-2">
+                    <Button
+                      onClick={handlePostSubmit}
+                      className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+                    >
+                      Post
+                    </Button>
+                    <Button
+                      onClick={() => setIsModalOpen(false)}
+                      className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600"
+                    >
+                      Cancel
+                    </Button>
+                  </Modal.Actions>
+                </Modal>
               </div>
+
               <div className="flex items-center py-3">
                 <hr className="flex-grow" />
                 <p className="px-2 text-sm">Sort By : Dropdown</p>
               </div>
-              {postData.map((post, id) => {
-                // console.log(post);
-                return (
-                  <Post
-                    key={id}
-                    username={post.username}
-                    avatar={post.avatar}
-                    images={post.images}
-                    likes={post.likes}
-                    comments={post.comments}
-                    postText={post.postText}
-                    postId={post.postId}
-                  />
-                );
-              })}
+              {postData ? (
+                postData.map((post, id) => {
+                  return (
+                    <Post
+                      key={id}
+                      uploadedTime={post.time}
+                      username={post.username}
+                      avatar={post.avatar}
+                      images={post.images}
+                      link={post.link}
+                      likes={post.likes}
+                      likesCount={post.likesCount}
+                      comments={post.comments}
+                      postText={post.postText}
+                      postId={post.postId}
+                      fileId={post.fileId}
+                    />
+                  );
+                })
+              ) : (
+                <p className="text-center">loading...</p>
+              )}
             </div>
           )}
 
