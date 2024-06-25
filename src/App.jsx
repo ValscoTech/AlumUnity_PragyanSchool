@@ -35,7 +35,7 @@ function App() {
           <Route path="/onboarding2" element={<ScreenTwo />} />
           <Route path="/onboarding3" element={<ScreenThree />} />
           <Route path="/admindashboard" element={<AdminDashboard/>} />
-          <Route path="/editprofile" element={<EditProfile />} />  
+          <Route path="/:id/editprofile" element={<EditProfile />} />  
         </Routes>
       </div>
     </Router>
