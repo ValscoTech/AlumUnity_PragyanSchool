@@ -14,7 +14,6 @@ import ScreenThree from "./components/onBoardings/screenThree.jsx";
 import AdminDashboard from "./components/admin/adminDashboard/adminDashboard.jsx";
 import AuthProvider from "./contexts/AuthContext.jsx";
 import ProtectedRoute from "./components/protected/ProtectedRoute.jsx";
-import EditProfile from "./components/editprofile/editprofile.jsx";
 
 function App() {
   return (
@@ -28,8 +27,6 @@ function App() {
             <Route path="/notification" element={<Notification />} />
             <Route path="/messages" element={<MessageBoard />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/admindashboard" element={<AdminDashboard />} />
-            <Route path="/editprofile" element={<EditProfile />} />
           </Route>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<TripleLogin />} />
