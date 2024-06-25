@@ -1,12 +1,19 @@
-import React, { useState } from "react";
-import { FiBell } from "react-icons/fi"; // Import notification bell icon
-import SchoolLogo from "../../assets/images/message/Schoollogo.png"; // Replace with the path to your school logo
-import ProfilePicture from "../../assets/images/message/profile.png"; // Replace with the path to your profile picture
-import tick from "../../../public/Images/tick-mark.png";
-import cross from "../../../public/Images/remove.png";
+import React from "react";
+import { FiX } from "react-icons/fi";
+import { Link } from "react-router-dom";
 
 const Notification = () => {
   // Sample data (replace with actual data from your application)
+  const NavItem = ({ to, icon}) => {
+    return (
+      <Link
+        to={to}
+        className="flex items-center cursor-pointer py-2 transition"
+      >
+        <span className="text-black">{icon}</span>
+      </Link>
+    );
+  };
   const userProfile = "Images/profile.jpg";
   const userName = "John Doe";
   const notificationData = [
@@ -81,6 +88,7 @@ const Notification = () => {
 
       <div className=" mx-auto bg-white rounded-md overflow-hidden shadow-md p-6">
         <div className="mt-2">
+          <NavItem to="/messages" icon={<FiX />} />
           <h3 className="text-2xl font-semibold mb-4">Notifications</h3>
           <hr />
 
