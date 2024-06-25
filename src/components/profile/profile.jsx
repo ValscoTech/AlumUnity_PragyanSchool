@@ -48,7 +48,8 @@ const profile = () => {
                   <div className="absolute top-5 right-5 edit-options flex w-fit ml-auto gap-4">
                     <button className="profile-control-options py-2 px-3 rounded-full bg-[#0D0D0D99] flex justify-between items-center hover:bg-[#0b72da24] ml-auto text-white ">
                       <FaRegEdit />
-                      <span className="px-2">Edit Profle</span>
+                      <span className="px-2"
+                      onClick={() => navigate("/editprofile")}>Edit Profile</span>
                     </button>
                     <button className="profile-control-options py-2 px-3 rounded-full bg-[#0D0D0D99] flex justify-between items-center hover:bg-[#0b72da24] ml-auto text-white">
                       <SlOptionsVertical />

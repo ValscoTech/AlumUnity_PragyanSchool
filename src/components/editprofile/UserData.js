@@ -1,5 +1,5 @@
-import coverImg from "../../assets/images/users/CoverImg.png";
 import user2 from "../../assets/images/users/user2.png";
+import coverImg from "../../assets/images/users/CoverImg.png";
 
 export const currentUser = {
   userImg: user2,

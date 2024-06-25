@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import NavBar from "../../helper/navbar";
-import { Table, Space } from "antd";
+import axios from 'axios'
+import { Table, Space, message } from "antd";
 import useScreenSize from "../../../utils/useScreenSize";
 import RiseLoader from "react-spinners/RiseLoader";
+ 
 
 const QueryComponent = () => {
   return (
@@ -43,7 +45,11 @@ const AdminDashboard = () => {
   const [selectedButton, setSelectedButton] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [pendingUsers, setPendingUsers] = useState([]);
+  const [selectedRole, setSelectedRole] = useState("student");
+  
+  
+   
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
@@ -51,176 +57,74 @@ const AdminDashboard = () => {
 
     return () => clearTimeout(timer);
   }, []);
+  
 
-  const facultyTableData = [
-    {
-      key: 1,
-      Name: "Fac1",
-      Reg_No: "Something",
-      DOR: "12/12/12",
-      Username: "something123",
-    },
-    {
-      key: 2,
-      Name: "Fac2",
-      Reg_No: "Something",
-      DOR: "12/12/12",
-      Username: "something123",
-    },
-    {
-      key: 3,
-      Name: "Fac3",
-      Reg_No: "Something",
-      DOR: "12/12/12",
-      Username: "something123",
-    },
-    {
-      key: 4,
-      Name: "Fac4",
-      Reg_No: "Something",
-      DOR: "12/12/12",
-      Username: "something123",
-    },
-    {
-      key: 5,
-      Name: "Fac5",
-      Reg_No: "Something",
-      DOR: "12/12/12",
-      Username: "something123",
-    },
-     
-  ];
+  useEffect(() => {
+    const fetchPendingUsers = async () => {
+      try {
+        const token = sessionStorage.getItem('token');
+        if (!token) {
+          throw new Error('No token found in sessionStorage');
+        }
 
-  const alumniTableData = [
-    {
-      key: 1,
-      Name: "Alumni1",
-      Reg_No: "Something",
-      DOR: "12/12/12",
-      Username: "somethingAlum123",
-    },
-    {
-      key: 2,
-      Name: "Alumni2",
-      Reg_No: "Something",
-      DOR: "12/12/12",
-      Username: "somethingAlum123",
-    },
-    {
-      key: 3,
-      Name: "Alumni3",
-      Reg_No: "Something",
-      DOR: "12/12/12",
-      Username: "somethingAlum123",
-    },
-    {
-      key: 4,
-      Name: "Alumni4",
-      Reg_No: "Something",
-      DOR: "12/12/12",
-      Username: "somethingAlum123",
-    },
-    {
-      key: 5,
-      Name: "Alumni5",
-      Reg_No: "Something",
-      DOR: "12/12/12",
-      Username: "somethingAlum123",
-    },
-     
-  ];
+        const response = await axios.get('http://localhost:3000/api/admin/pending-users', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        setPendingUsers(response.data);
+
+        
+         
+        setLoading(false);  
+      } catch (error) {
+        console.error('Error fetching pending users:', error);
+        setLoading(false);  
+        message.error('Failed to fetch pending users');  
+      }
+    };
+
+    fetchPendingUsers();
+  }, []);
+
+  const handleRoleSelection = (role) => {
+    setSelectedRole(role);
+  };
+
+  const filteredPendingUsers = pendingUsers.filter(user => user.role === selectedRole);
 
 
-  const studentTableData = [
-    {
-      key: 1,
-      Name: "Navin",
-      Reg_No: "21bce3310",
-      DOR: "12/12/12",
-      Username: "nvnie123",
-    },
-    {
-      key: 2,
-      Name: "Navin2",
-      Reg_No: "21bce3310",
-      DOR: "12/12/12",
-      Username: "nvnie123",
-    },
-    {
-      key: 3,
-      Name: "Navin",
-      Reg_No: "21bce3310",
-      DOR: "12/12/12",
-      Username: "nvnie123",
-    },
-    {
-      key: 4,
-      Name: "Navin",
-      Reg_No: "21bce3310",
-      DOR: "12/12/12",
-      Username: "nvnie123",
-    },
-    {
-      key: 5,
-      Name: "Navin",
-      Reg_No: "21bce3310",
-      DOR: "12/12/12",
-      Username: "nvnie123",
-    },
-    {
-      key: 6,
-      Name: "Navin",
-      Reg_No: "21bce3310",
-      DOR: "12/12/12",
-      Username: "nvnie123",
-    },
-    {
-      key: 7,
-      Name: "Navin",
-      Reg_No: "21bce3310",
-      DOR: "12/12/12",
-      Username: "nvnie123",
-    },
-    {
-      key: 9,
-      Name: "Navin",
-      Reg_No: "21bce3310",
-      DOR: "12/12/12",
-      Username: "nvnie123",
-    },
-
-     
-  ];
+ 
 
 
   const columns = [
     {
       title: "S.No",
-    dataIndex: "key",
-    render: (_, record, index) => <span className="text-black">{index + 1}</span>,
-      //render: (index) => <a>{index}</a>,
-      
+      dataIndex: "key",
+      render: (_, __, index) => <span className="text-black">{index + 1}</span>,
     },
     {
       title: "Name",
-      dataIndex: "Name",
-      key: "Name",
-      render: (text) => <a>{text}</a>,
+      dataIndex: "name",
+      key: "name",
+      render: (text) => <span>{text}</span>,
     },
     {
-      title: "Reg.No",
-      dataIndex: "Reg_No",
-      key: "Reg_No",
+      title: "Reg. No",
+      dataIndex: "schoolCode",
+      key: "schoolCode",
     },
     {
       title: "Date Of Registration",
-      dataIndex: "DOR",
-      key: "DOR",
+      dataIndex: "createdat",
+      key: "createdat",
+      render: (text) => <span>{new Date(text).toLocaleDateString()}</span>,
     },
     {
       title: "Username",
-      key: "Username",
-      dataIndex: "Username",
+      dataIndex: "email",
+      key: "email",
+      render: (text) => <span>{text.split('@')[0]}</span>,
     },
     {
       title: "Approve/Deny",
@@ -228,24 +132,75 @@ const AdminDashboard = () => {
       render: (_, record) => (
         <Space size="large">
           <a className="rounded-full px-2 py-1 bg-[#247000] cursor-pointer text-white hover:bg-[#319a00]" onClick={() => handleApprove(record)}>Approve</a>
-          <a className="rounded-full px-2 py-1 bg-[#FF0000] cursor-pointer text-white hover:bg-[#bb0000]"onClick={() => handleDeny(record)}>Deny</a>
+          <a className="rounded-full px-2 py-1 bg-[#FF0000] cursor-pointer text-white hover:bg-[#bb0000]" onClick={() => handleDeny(record)}>Deny</a>
         </Space>
       ),
     },
   ];
 
 
-  const handleApprove = (record) => {
-    console.log("Approved:", record);
-     
+  const handleApprove = async (record) => {
+    try {
+      console.log('Approving user with key:', record._id); // Log the record key
+      setLoading(true);
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        throw new Error('No token found in sessionStorage');
+      }
+      
+      const requestBody = { userId: record._id, approve: true }; // Ensure correct property name and value
+      console.log('Request body:', requestBody); // Log the request body
+      
+      const response = await axios.post('http://localhost:3000/api/admin/approve-user', requestBody, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      console.log('Response:', response); // Log the response
+      setPendingUsers(prevUsers => prevUsers.filter(user => user._id !== record._id));
+      message.success('User approved successfully');
+    } catch (error) {
+      console.error('Error approving user:', error);
+      message.error('Failed to approve user');
+    } finally {
+      setLoading(false);
+    }
   };
+  
 
-  const handleDeny = (record) => {
-    console.log("Denied:", record);
-    
+  const handleDeny = async (record) => {
+    try {
+      console.log('Denying user with key:', record._id); // Log the record key
+      setLoading(true);
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        throw new Error('No token found in sessionStorage');
+      }
+      
+      const requestBody = { userId: record._id, approve: false }; // Ensure correct property name and value
+      console.log('Request body:', requestBody); // Log the request body
+      
+      const response = await axios.post('http://localhost:3000/api/admin/approve-user', requestBody, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      console.log('Response:', response); // Log the response
+      setPendingUsers(prevUsers => prevUsers.filter(user => user._id !== record._id));
+      message.success('User denied successfully');
+    } catch (error) {
+      console.error('Error denying user:', error);
+      message.error('Failed to deny user');
+    } finally {
+      setLoading(false);
+    }
   };
+  
 
   const filterData = (data) => {
+    if (!data) return [];
     return data.filter((item) =>
       Object.values(item).some((value) =>
         value.toString().toLowerCase().includes(searchQuery.toLowerCase())
@@ -254,21 +209,7 @@ const AdminDashboard = () => {
   };
 
   const getData = () => {
-    let data;
-    switch (selectedButton) {
-      case 0:
-        data = filterData(studentTableData);
-        break;
-      case 1:
-        data = filterData(facultyTableData);
-        break;
-      case 2:
-        data = filterData(alumniTableData);
-        break;
-      default:
-        data = [];
-    }
-    return data;
+    return filterData(filteredPendingUsers);
   };
 
   return (
@@ -283,7 +224,7 @@ const AdminDashboard = () => {
                 <div className="flex justify-evenly text-2xl">
                   <ul className="flex lg:gap-16 md:gap-10 gap-3 py-4">
                     <li
-                      onClick={() => setSelectedButton(0)}
+                      onClick={() => handleRoleSelection("student")}
                       className={`${
                         selectedButton === 0
                           ? "bg-[#163560] text-white"
@@ -293,7 +234,7 @@ const AdminDashboard = () => {
                       Student
                     </li>
                     <li
-                      onClick={() => setSelectedButton(1)}
+                      onClick={() => handleRoleSelection("faculty")}
                       className={`${
                         selectedButton === 1
                           ? "bg-[#163560] text-white"
@@ -303,7 +244,7 @@ const AdminDashboard = () => {
                       Faculty
                     </li>
                     <li
-                      onClick={() => setSelectedButton(2)}
+                      onClick={() => handleRoleSelection("alumini")}
                       className={`${
                         selectedButton === 2
                           ? "bg-[#163560] text-white"
