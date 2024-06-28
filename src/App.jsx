@@ -16,6 +16,7 @@ import AuthProvider from "./contexts/AuthContext.jsx";
 import ProtectedRoute from "./components/protected/ProtectedRoute.jsx";
 import EditProfile from "./components/editprofile/editprofile.jsx";
 
+
 function App() {
   return (
     <AuthProvider>
@@ -29,6 +30,7 @@ function App() {
             <Route path="/messages" element={<MessageBoard />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/:id/editprofile" element={<EditProfile />} /> 
+
           </Route>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<TripleLogin />} />
@@ -37,11 +39,10 @@ function App() {
           <Route path="/onboarding1" element={<ScreenOne />} />
           <Route path="/onboarding2" element={<ScreenTwo />} />
           <Route path="/onboarding3" element={<ScreenThree />} />
-          
+
         </Routes>
       </Router>
     </AuthProvider>
   );
 }
-
 export default App;

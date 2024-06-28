@@ -1,29 +1,127 @@
-import { FaRegThumbsUp } from "react-icons/fa6";
+import { useContext, useState, useEffect } from "react";
+import { FaRegThumbsUp, FaThumbsUp } from "react-icons/fa6";
 import { FiSend } from "react-icons/fi";
+import { AuthContext } from "../../contexts/AuthContext";
+
+function formatDateTime(timestamp, comment) {
+  const date = new Date(timestamp);
+  let options;
+  if (comment) {
+    options = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    };
+  } else {
+    options = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    };
+  }
+  return date.toLocaleDateString("en-US", options);
+}
 
 const Post = ({
   username,
   avatar,
   images,
   likes,
-  comments,
   postText,
-  postId,
+  uploadedTime,
+  link,
+  fileId,
+  likesCount,
 }) => {
-  function handleComment(e, postId) {
+  const [commentsLoaded, setCommentsLoaded] = useState(false);
+  const [postComments, setPostComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+  const [likeCount, setLikesCount] = useState(likesCount);
+  const { user } = useContext(AuthContext);
+  const userId = user && user._id;
+  const [liked, setLiked] = useState(likes.includes(userId));
+  useEffect(() => {
+    setLikesCount(likesCount);
+    setLiked(likes.includes(userId));
+  }, [likesCount, likes, userId]);
+  const handleComment = (e, postId) => {
     const obj = {
       postId,
       action: "Comment",
     };
     console.log(obj);
-  }
-  function handleLike(e, postId) {
-    const obj = {
-      postId,
-      action: "Like",
+  };
+
+  const handleLike = async () => {
+    const urlPlaceholder = liked ? "unlike" : "like";
+    const response = await fetch(
+      `http://localhost:8080/api/posts/${fileId}/${urlPlaceholder}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: userId }),
+      }
+    );
+    if (response.ok) {
+      setLiked(!liked);
+      setLikesCount((prev) => (liked ? prev - 1 : prev + 1));
+    }
+  };
+
+  const handleViewComments = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/posts/${fileId}/comments`
+      );
+      const data = await response.json();
+      setPostComments(data);
+      setCommentsLoaded(true);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
+  };
+
+  const handleSendComment = async () => {
+    if (newComment.trim() === "") {
+      alert("Oops! Guess you are missing to fill the comment section");
+      return;
+    }
+
+    const commentData = {
+      username: user && user.name,
+      comment: newComment,
+      commentTime: new Date().toISOString(),
     };
-    console.log(obj);
-  }
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/posts/${fileId}/comments`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(commentData),
+        }
+      );
+      if (response.ok) {
+        setNewComment("");
+        handleViewComments();
+      }
+    } catch (error) {
+      console.error("Error sending comment:", error);
+    }
+  };
 
   return (
     <div className="bg-backgroundColor-lightgray p-4 mb-4 rounded-2xl shadow-xl">
@@ -40,7 +138,7 @@ const Post = ({
               {username}
             </p>
             <p className="text-gray-600 text-xs md:text-base max-w-20 md:max-w-full">
-              Posted 3 hours ago
+              Posted on {formatDateTime(uploadedTime)}
             </p>
           </div>
         </div>
@@ -49,13 +147,26 @@ const Post = ({
         </button>
       </div>
 
-      {/*  Post Text */}
-
+      {/* Post Text */}
       <div className="my-4">{postText}</div>
+
+      {/* Post Link */}
+      {link && (
+        <div className="my-2">
+          <a
+            href={link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 underline"
+          >
+            {link}
+          </a>
+        </div>
+      )}
 
       {/* Post Images */}
       <div className="mb-4">
-        {images.map((image, index) => (
+        {images?.map((image, index) => (
           <img
             key={index}
             src={image}
@@ -66,22 +177,19 @@ const Post = ({
       </div>
 
       {/* Post Actions (Likes and Comments) */}
-      <div className="">
+      <div>
         <div className="flex items-center w-full justify-between space-x-4">
           <p
-            className="pl-5 flex items-center gap-1"
-            onClick={(e) => handleLike(e, postId)}
+            className="pl-5 flex items-center gap-1 cursor-pointer"
+            onClick={handleLike}
           >
-            <FaRegThumbsUp className="text-backgroundColor-commentblue " />
-            {likes}
+            {liked ? (
+              <FaThumbsUp className="text-backgroundColor-commentblue" />
+            ) : (
+              <FaRegThumbsUp className="text-backgroundColor-commentblue" />
+            )}
+            {likeCount}
           </p>
-
-          {/* <button
-            className="flex items-center text-gray-100"
-            onClick={(e) => handleComment(e, postId)}
-          >
-            💬 Comment
-          </button> */}
           <p className="pr-2">
             <FiSend className="text-xl" />
           </p>
@@ -90,20 +198,46 @@ const Post = ({
           <div className="flex items-center pr-6 pl-2 py-2 mx-auto">
             <img
               src="Images/profile.jpg"
-              alt={` avatar`}
+              alt="avatar"
               className="w-10 h-10 rounded-full object-cover mr-3 border-2 border-black"
             />
             <input
               type="text"
-              // value={newPostText}
-              // onChange={(e) => handleInputTextChange(e)}
               className="md:p-2 p-1 rounded-3xl md:w-full text-xs md:text-base w-11/12 font-semibold placeholder:text-black bg-backgroundColor-gray"
               placeholder="Add a comment..."
-            ></input>
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+            />
+            <button
+              onClick={handleSendComment}
+              className="ml-2 p-1 md:p-2 bg-backgroundColor-gray rounded-3xl text-xs md:text-base font-semibold text-backgroundColor-commentblue"
+            >
+              Send
+            </button>
           </div>
-          <p className="text-backgroundColor-commentblue pl-2">
-            View All comments
-          </p>
+          {commentsLoaded ? (
+            <div className="pl-2">
+              {postComments.length > 0 ? (
+                postComments.map((comment, index) => (
+                  <div key={index} className="my-2">
+                    <p className="font-semibold">
+                      {comment.username} commented "{comment.comment}" on{" "}
+                      {formatDateTime(comment.commentTime, true)}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p>No comments</p>
+              )}
+            </div>
+          ) : (
+            <p
+              className="text-backgroundColor-commentblue pl-2 cursor-pointer"
+              onClick={handleViewComments}
+            >
+              View All comments
+            </p>
+          )}
         </div>
       </div>
     </div>
