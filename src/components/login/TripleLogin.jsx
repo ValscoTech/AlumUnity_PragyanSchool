@@ -1,14 +1,14 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FaFacebook, FaGoogle, FaTwitter } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { redirect, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
 
 const TripleLogin = () => {
-  const [activeUser, setactiveUser] = useState(1); //default set to Student
+  const [activeUser, setactiveUser] = useState(1);
   const [imageOpacity, setImageOpacity] = useState(100);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState(null);
-  const [user, setUser] = useState({
+  const [userData, setUserData] = useState({
     type: "Student",
     userID: "",
     email: "",
@@ -16,7 +16,6 @@ const TripleLogin = () => {
   });
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
-
   const handleButtonClick = (buttonNumber) => {
     const type =
       buttonNumber === 1
@@ -24,7 +23,7 @@ const TripleLogin = () => {
         : buttonNumber === 2
         ? "Faculty"
         : "Alumni";
-    setUser({ type: type });
+    setUserData({ type: type });
     setactiveUser(buttonNumber);
     setImageOpacity(0);
     setTimeout(() => setImageOpacity(1), 100);
@@ -32,12 +31,14 @@ const TripleLogin = () => {
 
   function handleChange(e) {
     const { id, value } = e.target;
-    setUser({
-      ...user,
+    setUserData({
+      ...userData,
       [id]: value,
     });
   }
-
+  function callBack() {
+    navigate("/dashboard");
+  }
   const handleLoginClick = async () => {
     setIsSubmitting(true);
     try {
@@ -46,7 +47,12 @@ const TripleLogin = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(user),
+        body: JSON.stringify({
+          email: userData.email,
+          password: userData.password,
+          userID: userData.userID,
+          role: userData.type,
+        }),
       });
 
       if (response.ok) {
@@ -55,18 +61,27 @@ const TripleLogin = () => {
         if (!token) {
           return;
         }
-        login(token);
+        login(token, callBack);
+
         setErrors(null);
-        navigate("/dashboard");
       } else {
         const errorData = await response.json();
         setErrors(errorData.message || "Login Failed");
+        setIsSubmitting(false);
+        setUserData((pre) => {
+          return {
+            ...pre,
+            email: "",
+            password: "",
+            userID: "",
+          };
+        });
       }
     } catch (err) {
       setErrors("Login Failed");
       console.log(err);
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
 
   const handleSignupClick = () => {
@@ -199,7 +214,7 @@ const TripleLogin = () => {
                 type="number"
                 id="userID"
                 name="userID"
-                value={user.userID}
+                value={userData.userID}
                 onChange={(e) => handleChange(e)}
                 placeholder={`Enter your ${
                   activeUser === 1
@@ -215,7 +230,7 @@ const TripleLogin = () => {
                 type="email"
                 id="email"
                 name="email"
-                value={user.email}
+                value={userData.email}
                 onChange={(e) => handleChange(e)}
                 className="px-4 py-2 border border-slate-500 text-blue-900 font-semibold shadow-sm rounded-full"
                 placeholder="Enter your email"
@@ -225,7 +240,7 @@ const TripleLogin = () => {
                 type="password"
                 id="password"
                 name="password"
-                value={user.password}
+                value={userData.password}
                 onChange={(e) => handleChange(e)}
                 className="px-4 py-2 border border-slate-500 text-blue-900 font-semibold shadow-sm rounded-full"
                 placeholder="Enter your password"

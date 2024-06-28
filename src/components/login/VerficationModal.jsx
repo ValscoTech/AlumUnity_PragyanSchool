@@ -1,58 +1,69 @@
 import React, { useEffect, useRef, useState } from "react";
 
-const VerficationModal = ({ length, onOtpSubmit = () => {} }) => {
+const VerificationModal = ({ length, onOtpSubmit = () => {}, phoneNumber }) => {
   const [isLoading, setLoading] = useState(false);
   const [otp, setOtp] = useState(new Array(length).fill(""));
   const inputRefs = useRef([]);
+
   useEffect(() => {
     if (inputRefs.current[0]) {
       inputRefs.current[0].focus();
     }
   }, []);
-  function someRequest() {
-    //Simulates a request; makes a "promise" that'll run for 2.5 seconds
-    return new Promise((resolve) => setTimeout(() => resolve(), 2500));
-  }
+
+  const verifyOtp = async (combineOtp) => {
+    try {
+      const response = await fetch("http://localhost:3000/api/otp/verify-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ phoneNumber, otp: combineOtp }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        onOtpSubmit();
+      } else {
+        alert(data.message || "Invalid OTP");
+        setOtp(new Array(length).fill(""));
+        inputRefs.current[0].focus();
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      alert("Failed to verify OTP. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleChange = (index, e) => {
     const val = e.target.value;
     if (isNaN(val)) return;
 
     const newOtp = [...otp];
-    // allow only one input
     newOtp[index] = val.substring(val.length - 1);
     setOtp(newOtp);
 
-    // Submit Trigger
     const combineOtp = newOtp.join("");
-    if (combineOtp.length == length) {
+    if (combineOtp.length === length) {
       setLoading(true);
-      someRequest().then(() => {
-        setLoading(!isLoading);
-        const loaderElement = document.querySelector(".loader-container");
-        if (loaderElement && combineOtp === "1234") {
-          loaderElement.remove();
-          onOtpSubmit();
-        } else {
-          alert("Invalid OTP");
-          setOtp(new Array(length).fill(""));
-          inputRefs.current[0].focus();
-        }
-      });
+      verifyOtp(combineOtp);
     }
 
-    // Move to next input field automatically
     if (val && index < length - 1 && inputRefs.current[index + 1]) {
       inputRefs.current[index + 1].focus();
     }
   };
+
   const handleClick = (index) => {
     inputRefs.current[index].setSelectionRange(1, 1);
-
-    // if skipped any previous field it will go back to the empty field
     if (index > 0 && !otp[index - 1]) {
       inputRefs.current[otp.indexOf("")].focus();
     }
   };
+
   const handleKeyDown = (index, e) => {
     if (
       e.key === "Backspace" &&
@@ -60,27 +71,25 @@ const VerficationModal = ({ length, onOtpSubmit = () => {} }) => {
       index > 0 &&
       inputRefs.current[index - 1]
     ) {
-      // Moving focus to the previous input field
       inputRefs.current[index - 1].focus();
     }
   };
+
   return (
     <>
       <div className="otp-box flex gap-4">
-        {otp.map((val, index) => {
-          return (
-            <input
-              ref={(input) => (inputRefs.current[index] = input)}
-              key={index}
-              type="text"
-              value={val}
-              onChange={(e) => handleChange(index, e)}
-              onClick={() => handleClick(index)}
-              onKeyDown={(e) => handleKeyDown(index, e)}
-              className="otpInput border-4 border-solid w-[40px] h-[40px] md:w-[50px] md:h-[50px] text-center text-[1.2rem]"
-            />
-          );
-        })}
+        {otp.map((val, index) => (
+          <input
+            ref={(input) => (inputRefs.current[index] = input)}
+            key={index}
+            type="text"
+            value={val}
+            onChange={(e) => handleChange(index, e)}
+            onClick={() => handleClick(index)}
+            onKeyDown={(e) => handleKeyDown(index, e)}
+            className="otpInput border-4 border-solid w-[40px] h-[40px] md:w-[50px] md:h-[50px] text-center text-[1.2rem]"
+          />
+        ))}
       </div>
       {isLoading && (
         <div className="loader-container">
@@ -91,4 +100,4 @@ const VerficationModal = ({ length, onOtpSubmit = () => {} }) => {
   );
 };
 
-export default VerficationModal;
+export default VerificationModal;
